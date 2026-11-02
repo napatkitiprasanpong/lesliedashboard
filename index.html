@@ -41,8 +41,8 @@ main{margin-left:236px;padding:32px 28px 60px;max-width:1000px}
 .ring{width:110px;height:110px;flex:none}.ring circle{fill:none;stroke-width:10}
 .ring .a{stroke:rgba(255,255,255,.08)}.ring .b{stroke:var(--red2);stroke-linecap:round;stroke-dasharray:327;animation:ring 1.2s .3s cubic-bezier(.2,.8,.2,1) both}
 form{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-input,select{background:rgba(0,0,0,.45);border:1px solid var(--line);color:var(--tx);padding:11px 13px;border-radius:12px;font:inherit;min-width:0;flex:1 1 130px;transition:border-color .2s,box-shadow .2s}
-input:focus,select:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(225,29,46,.25);outline:0}
+input,select,textarea{background:rgba(0,0,0,.45);border:1px solid var(--line);color:var(--tx);padding:11px 13px;border-radius:12px;font:inherit;min-width:0;flex:1 1 130px;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(225,29,46,.25);outline:0}
 .btn{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;border:0;padding:11px 20px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px -6px rgba(255,71,87,.7)}.btn:active{transform:scale(.96)}
 .ghost{background:none;border:1px solid var(--line);color:var(--mut);padding:6px 11px;border-radius:9px;cursor:pointer;font:inherit;font-size:13px;transition:.2s}
@@ -68,10 +68,15 @@ input:focus,select:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(225,
 .pb{padding:12px 14px}.pb b{display:block;overflow-wrap:anywhere}
 .pa{display:flex;gap:6px;padding:0 14px 14px;flex-wrap:wrap}
 .foot{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap}
+.sub{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.sub .ghost{padding:8px 14px;font-size:14px}.sub .ghost.on{color:#fff;border-color:var(--red2);background:linear-gradient(90deg,rgba(225,29,46,.55),rgba(225,29,46,.12))}
+.th.sq{aspect-ratio:1/1}.th.pp{aspect-ratio:4/3}.th.pp img{object-fit:contain;background:#000}
+.fl{display:inline-flex;align-items:center;gap:6px;cursor:pointer;max-width:200px}.fl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pre{white-space:pre-wrap;overflow-wrap:anywhere}a.lk{color:var(--red2);text-decoration:none;overflow-wrap:anywhere}a.lk:hover{text-decoration:underline}
 @media(max-width:760px){
- aside{top:auto;width:100%;height:auto;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));border-right:0;border-top:1px solid var(--line);justify-content:space-around;gap:0}
+ aside{top:auto;width:100%;height:auto;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));border-right:0;border-top:1px solid var(--line);justify-content:flex-start;gap:0;overflow-x:auto;scrollbar-width:none}
+ aside::-webkit-scrollbar{display:none}
  .brand{display:none}
- aside button{flex-direction:column;gap:2px;font-size:10px;padding:6px 2px;flex:1;text-align:center;justify-content:center}
+ aside button{flex-direction:column;gap:2px;font-size:10px;padding:6px 5px;flex:1 0 auto;text-align:center;justify-content:center}
  aside button:hover{transform:none}aside button.on{box-shadow:inset 0 3px var(--red2)}
  main{margin:0;padding:calc(22px + env(safe-area-inset-top,0px)) 14px 100px}
 }
@@ -85,10 +90,10 @@ input:focus,select:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(225,
 <main id="view"></main>
 <input type="file" id="pic" accept="image/*" hidden>
 <script>
-const TABS=[["Dashboard","⌂"],["Task","✓"],["Calendar","▦"],["Event","★"],["Money","$"],["Calories","♥"],["Project","❖"],["File","▤"]];
+const TABS=[["Dashboard","⌂"],["Task","✓"],["Calendar","▦"],["Event","★"],["Money","$"],["Calories","♥"],["Project","❖"],["File","▤"],["Biocomputing","⬡"]];
 const NAMES=TABS.map(t=>t[0]);
-const COLS=["tasks","events","money","food","projects","folders","files"];
-const S={tasks:[],events:[],money:[],food:[],projects:[],folders:[],files:[],dead:{},gu:0,goal:2000};
+const COLS=["tasks","events","money","food","projects","folders","files","researchers","papers","scholarships"];
+const S={tasks:[],events:[],money:[],food:[],projects:[],folders:[],files:[],researchers:[],papers:[],scholarships:[],dead:{},gu:0,goal:2000};
 try{Object.assign(S,JSON.parse(localStorage.getItem("lpd")||"{}"))}catch(e){}
 const ghCfg=()=>{try{return JSON.parse(localStorage.getItem("lpd-gh"))}catch(e){return null}};
 const GH=()=>{const c=ghCfg();return c&&c.token&&c.repo?c:null};
@@ -104,7 +109,8 @@ async function ghConnect(v){const cfg={repo:v.r.trim().replace(/^https?:\/\/gith
 function ghCard(){const c=GH();return `<div class="card" style="margin:12px 0"><h3>GitHub sync</h3>`+(c?`<div class="mut">Connected to <b>${esc(c.repo)}</b> (${esc(c.branch||"main")}). <span id="ss">${esc(SS)}</span></div><div class="foot"><button class="ghost" data-a="sync">Sync now</button><button class="ghost" data-a="ghoff">Disconnect</button></div>`:`<form data-f="gh"><input name="r" placeholder="username/your-data-repo" required><input name="t" type="password" placeholder="Access token" required><input name="b" placeholder="Branch (main)" style="flex:0 1 120px"><button class="btn">Connect</button></form><div class="mut">Use a private repo and a token with Contents read and write. See README.</div>`)+`</div>`}
 const ghp=f=>"files/"+String(f.id).replace(/\W/g,"_")+".pdf";
 async function getPdf(f){if(f.gh){const c=GH();if(!c)throw 0;return(await ghFetch("/contents/"+ghp(f),{q:br(c),raw:true})).blob()}return fget(String(f.id))}
-async function dlPdf(i){const f=S.files.find(x=>x.id===i),b=await getPdf(f).catch(()=>null);if(!b)return alert("Could not get this PDF. Check your GitHub connection.");const u=URL.createObjectURL(new Blob([b],{type:"application/pdf"})),a=document.createElement("a");a.href=u;a.download=f.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
+const findPdf=i=>S.files.find(x=>x.id===i)||(S.papers.find(p=>p.pdf&&p.pdf.id===i)||{}).pdf;
+async function dlPdf(i){const f=findPdf(i),b=await getPdf(f).catch(()=>null);if(!b)return alert("Could not get this PDF. Check your GitHub connection.");const u=URL.createObjectURL(new Blob([b],{type:"application/pdf"})),a=document.createElement("a");a.href=u;a.download=f.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
 let H={},pt,SS="Not synced yet";
 const hs=it=>JSON.stringify({...it,u:0});
 function rebuild(){H={goal:S.goal};for(const k of COLS)for(const it of S[k])H[String(it.id)]=hs(it)}
@@ -124,7 +130,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const today=iso(new Date());
 let tab="Dashboard";try{const h=decodeURIComponent(location.hash.slice(1));if(NAMES.includes(h))tab=h}catch(e){}
-let cm=new Date();cm.setDate(1);let sel=today,picFor=null,cwd=null,openP=null;
+let cm=new Date();cm.setDate(1);let sel=today,picFor=null,picK="projects",cwd=null,openP=null,bsub="Researcher";
 const money=n=>(n<0?"-":"")+"$"+Math.abs(n).toFixed(2);
 const id=()=>Date.now()+Math.random();
 const empty=t=>`<div class="empty">${t}</div>`;
@@ -137,7 +143,7 @@ const fput=async(k,b)=>{const d=await idb();return new Promise(r=>{const t=d.tra
 const fget=async k=>{const d=await idb();return new Promise(r=>{const q=d.transaction("f").objectStore("f").get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})};
 const fdel=async k=>{try{const d=await idb();d.transaction("f","readwrite").objectStore("f").delete(k)}catch(e){}};
 async function upload(e){for(const f of e.target.files){if(f.size>25e6){alert(f.name+" is over 25 MB");continue}const i=id(),it={id:i,name:f.name,size:f.size,folder:cwd};if(GH()){try{it.gh=1;await ghPut(ghp(it),f)}catch(x){alert("Upload failed: "+x.message);continue}}else await fput(String(i),f);S.files.push(it)}e.target.value="";save();render()}
-async function openPdf(i){const f=S.files.find(x=>x.id===i),b=await getPdf(f).catch(()=>null);if(!b)return alert("This PDF is not on this device. Open it on the device where you added it.");const u=URL.createObjectURL(new Blob([b],{type:"application/pdf"})),v=document.createElement("div");v.className="pv";v.innerHTML=`<div class="pvh"><b>${esc(f.name)}</b><span><a class="ghost" download="${esc(f.name)}" href="${u}">Download</a> <button class="ghost" id="pvx">Close</button></span></div><iframe src="${u}"></iframe>`;document.body.append(v);$("#pvx").onclick=()=>{v.remove();URL.revokeObjectURL(u)}}
+async function openPdf(i){const f=findPdf(i),b=await getPdf(f).catch(()=>null);if(!b)return alert("This PDF is not on this device. Open it on the device where you added it.");const u=URL.createObjectURL(new Blob([b],{type:"application/pdf"})),v=document.createElement("div");v.className="pv";v.innerHTML=`<div class="pvh"><b>${esc(f.name)}</b><span><a class="ghost" download="${esc(f.name)}" href="${u}">Download</a> <button class="ghost" id="pvx">Close</button></span></div><iframe src="${u}"></iframe>`;document.body.append(v);$("#pvx").onclick=()=>{v.remove();URL.revokeObjectURL(u)}}
 function repoInfo(v){
   v=v.trim().replace(/\.git$/,"").replace(/\/$/,"");
   const m=v.match(/github\.com\/([\w.-]+)\/([\w.-]+)/)||v.match(/^([\w.-]+)\/([\w.-]+)$/);
@@ -146,6 +152,18 @@ function repoInfo(v){
 const bal=()=>S.money.reduce((a,m)=>a+(m.type==="in"?m.amt:-m.amt),0);
 const kcal=()=>S.food.filter(f=>f.date===today).reduce((a,f)=>a+f.kcal,0);
 const thumb=p=>p.img?`<img src="${p.img}" alt="">`:esc(p.title[0].toUpperCase());
+
+function shrink(file,o){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const c=document.createElement("canvas"),x=c.getContext("2d");let W=o.w,H=o.h,w,h,dx=0,dy=0;if(o.fit){const k=Math.min(1,W/img.width,H/img.height);W=Math.round(img.width*k);H=Math.round(img.height*k);w=W;h=H}else{const k=Math.max(W/img.width,H/img.height);w=img.width*k;h=img.height*k;dx=(W-w)/2;dy=(H-h)*(o.fy==null?.5:o.fy)}c.width=W;c.height=H;x.drawImage(img,dx,dy,w,h);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.75))};img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("image"))};img.src=u})}
+const PIC={projects:{w:480,h:270},researchers:{w:240,h:240,fy:.3},papers:{w:480,h:360,fit:1}};
+async function putPdf(file){if(file.size>25e6){alert(file.name+" is over 25 MB");return null}if(file.type&&file.type!=="application/pdf"){alert(file.name+" is not a PDF");return null}const o={id:id(),name:file.name,size:file.size};try{if(GH()){o.gh=1;await ghPut(ghp(o),file)}else await fput(String(o.id),file)}catch(x){alert("Upload failed: "+x.message);return null}return o}
+const busy=f=>{const b=f.querySelector(".btn");if(b){b.disabled=true;b.textContent="Saving..."}};
+async function addResearcher(f,v){const name=(v.name||"").trim();if(!name)return;busy(f);let img="";if(v.photo&&v.photo.size){try{img=await shrink(v.photo,PIC.researchers)}catch(x){render();return alert("Could not read that image.")}}S.researchers.push({id:id(),name,uni:(v.uni||"").trim(),contact:(v.contact||"").trim(),img});save();render()}
+async function addPaper(f,v){const title=(v.title||"").trim();if(!title)return;busy(f);const o={id:id(),title,img:"",pdf:null};if(v.photo&&v.photo.size){try{o.img=await shrink(v.photo,PIC.papers)}catch(x){render();return alert("Could not read that image.")}}if(v.pdf&&v.pdf.size){const r=await putPdf(v.pdf);if(!r)return render();o.pdf=r}S.papers.push(o);save();render()}
+async function attachPdf(i,file){const p=S.papers.find(x=>x.id===i);if(!p||p.pdf)return;const r=await putPdf(file);if(!r)return;p.pdf=r;save();render()}
+const ct=s=>esc(s||"").replace(/(https?:\/\/[^\s<]*[^\s<.,;:)]|www\.[^\s<]*[^\s<.,;:)])|([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/gi,(m,u,em)=>u?`<a class="lk" href="${/^www\./i.test(u)?"https://"+u:u}" target="_blank" rel="noopener">${u}</a>`:`<a class="lk" href="mailto:${em}">${em}</a>`);
+const dleft=d=>Math.round((new Date(d+"T00:00")-new Date(today+"T00:00"))/864e5);
+const fdate=d=>new Date(d+"T00:00").toLocaleDateString("en",{year:"numeric",month:"short",day:"numeric"});
+const pst=s=>!!s.date&&s.date<today;
 
 const V={
 Dashboard(){
@@ -203,6 +221,18 @@ File(){const fo=S.folders.filter(f=>(f.parent||null)===cwd),fl=S.files.filter(f=
 Project(){if(openP&&pj(openP))return projDetail();
   return `<form data-f="proj"><input name="r" placeholder="owner/repo or GitHub link" required style="flex:3 1 220px"><input name="n" placeholder="Display name (optional)"><button class="btn">Add repo</button></form>`+
   (S.projects.length?`<div class="grid">${S.projects.map(p=>`<div class="pc"><a href="${esc(p.url)}" target="_blank" rel="noopener"><div class="th">${thumb(p)}</div><div class="pb"><b>${esc(p.title)}</b><span class="mut">${esc(p.owner)}/${esc(p.name)}</span></div></a><div class="pa"><button class="ghost" data-a="ptask" data-i="${p.id}">Tasks (${S.tasks.filter(t=>t.pid===p.id).length})</button><button class="ghost" data-a="pic" data-i="${p.id}">Edit thumbnail</button>${p.img?`<button class="ghost" data-a="nopic" data-i="${p.id}">Reset</button>`:""}<button class="ghost" data-a="del" data-k="projects" data-i="${p.id}">Remove</button></div></div>`).join("")}</div>`:empty("Add a GitHub repo to open it from here."));
+},
+Biocomputing(){
+  const SUBS=["Researcher","Paper","Scholarship"],cnt=[S.researchers.length,S.papers.length,S.scholarships.length];
+  const nav=`<div class="sub">${SUBS.map((n,j)=>`<button class="ghost ${n===bsub?"on":""}" data-a="bsub" data-k="${n}">${n} (${cnt[j]})</button>`).join("")}</div>`;
+  const fp=(n,lab,acc)=>`<label class="ghost fl"><span data-d="${lab}">${lab}</span><input type="file" name="${n}" accept="${acc}" data-show hidden></label>`;
+  if(bsub==="Researcher")return nav+`<form data-f="researcher"><input name="name" placeholder="Name" required style="flex:2 1 160px"><input name="uni" placeholder="University / organization" style="flex:2 1 180px"><input name="contact" placeholder="Contact (email, link, phone)" style="flex:3 1 220px">${fp("photo","Photo","image/*")}<button class="btn">Add researcher</button></form>`+
+  (S.researchers.length?`<div class="grid">${S.researchers.map(r=>`<div class="pc"><div class="th sq">${r.img?`<img src="${esc(r.img)}" alt="${esc(r.name)}">`:esc(r.name[0].toUpperCase())}</div><div class="pb"><b>${esc(r.name)}</b><div class="mut">${esc(r.uni||"")}</div><div class="mut" style="margin-top:4px">${ct(r.contact)}</div></div><div class="pa"><button class="ghost" data-a="pic" data-k="researchers" data-i="${r.id}">${r.img?"Change photo":"Add photo"}</button><button class="ghost" data-a="del" data-k="researchers" data-i="${r.id}">Delete</button></div></div>`).join("")}</div>`:empty("No researchers yet. Add the people you want to follow or contact."));
+  if(bsub==="Paper")return nav+`<form data-f="paper"><input name="title" placeholder="Paper title" required style="flex:3 1 240px">${fp("photo","Picture","image/*")}${fp("pdf","PDF","application/pdf")}<button class="btn">Add paper</button></form>`+
+  (S.papers.length?`<div class="grid">${S.papers.map(p=>`<div class="pc"><div class="th pp">${p.img?`<img src="${esc(p.img)}" alt="">`:esc(p.title[0].toUpperCase())}</div><div class="pb"><b>${esc(p.title)}</b><div class="mut">${p.pdf?esc(p.pdf.name)+" · "+(p.pdf.size/1048576).toFixed(1)+" MB":"No PDF attached"}</div></div><div class="pa">${p.pdf?`<button class="ghost" data-a="open" data-i="${p.pdf.id}">Open</button><button class="ghost" data-a="dl" data-i="${p.pdf.id}">Download</button>`:`<label class="ghost fl"><span>Attach PDF</span><input type="file" accept="application/pdf" data-att="${p.id}" hidden></label>`}<button class="ghost" data-a="pic" data-k="papers" data-i="${p.id}">${p.img?"Change picture":"Add picture"}</button><button class="ghost" data-a="del" data-k="papers" data-i="${p.id}">Delete</button></div></div>`).join("")}</div>`:empty("No papers yet. Add a title with a picture and a PDF."));
+  const L=[...S.scholarships].sort((a,b)=>(pst(a)-pst(b))||(a.date||"9").localeCompare(b.date||"9"));
+  return nav+`<form data-f="schol"><input name="n" placeholder="Scholarship name" required style="flex:3 1 220px"><input name="o" placeholder="Organization" style="flex:2 1 180px"><input name="d" type="date" aria-label="Deadline"><textarea name="r" rows="3" placeholder="Requirements" style="flex:1 1 100%"></textarea><button class="btn">Add scholarship</button></form>`+
+  (L.length?L.map(s=>{const n=s.date?dleft(s.date):0,w=n<0?"Closed "+(-n)+(n===-1?" day":" days")+" ago":n===0?"Due today":n===1?"Due tomorrow":n+" days left";return `<div class="card" style="margin-bottom:10px${pst(s)?";opacity:.6":""}"><div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap"><div style="min-width:0"><b style="font-size:16px">${esc(s.n)}</b><div class="mut">${esc(s.org||"No organization")}</div></div><div style="text-align:right">${s.date?`<div><b>${fdate(s.date)}</b></div><div class="${n<0?"mut":n<=14?"out":"in"}">${w}</div>`:'<div class="mut">No date</div>'}</div></div>${s.req?`<div class="pre" style="margin-top:10px">${esc(s.req)}</div>`:""}<div class="foot" style="margin-top:12px"><button class="ghost" data-a="del" data-k="scholarships" data-i="${s.id}">Delete</button></div></div>`}).join(""):empty("No scholarships yet. Add the date, requirements and organization."));
 }};
 
 function render(enter){
@@ -218,13 +248,13 @@ document.addEventListener("click",e=>{
   if(b.dataset.tab){tab=b.dataset.tab;openP=null;try{location.hash=tab}catch(x){}scrollTo(0,0);return render(true)}
   const a=b.dataset.a,i=parseFloat(b.dataset.i),k=b.dataset.k;
   if(a==="tg"){const t=S.tasks.find(t=>t.id===i);t.done=!t.done}
-  else if(a==="del"){if(k==="folders"&&(S.folders.some(f=>f.parent===i)||S.files.some(f=>f.folder===i)))return alert("Folder is not empty.");if(k==="files"){const f=S.files.find(x=>x.id===i);fdel(String(i));if(f&&f.gh)ghDel(ghp(f)).catch(()=>{})}S[k]=S[k].filter(x=>x.id!==i)}
-  else if(a==="day"){sel=k}
+  else if(a==="del"){if(k==="papers"){const pp=S.papers.find(x=>x.id===i);if(pp&&pp.pdf){if(!confirm("Delete this paper and its PDF?"))return;fdel(String(pp.pdf.id));if(pp.pdf.gh)ghDel(ghp(pp.pdf)).catch(()=>{})}}if(k==="folders"&&(S.folders.some(f=>f.parent===i)||S.files.some(f=>f.folder===i)))return alert("Folder is not empty.");if(k==="files"){const f=S.files.find(x=>x.id===i);fdel(String(i));if(f&&f.gh)ghDel(ghp(f)).catch(()=>{})}S[k]=S[k].filter(x=>x.id!==i)}
+  else if(a==="day"){sel=k}else if(a==="bsub"){bsub=k}
   else if(a==="goto"){sel=k;const d=new Date(k+"T00:00");cm=new Date(d.getFullYear(),d.getMonth(),1);tab="Calendar";try{location.hash=tab}catch(x){}scrollTo(0,0);return render(true)}
   else if(a==="mo"){cm.setMonth(cm.getMonth()+ +k)}
   else if(a==="ptask"){openP=i}else if(a==="pback"){openP=null}else if(a==="cd"){cwd=i||null}else if(a==="open"){openPdf(i);return}else if(a==="sync"){sync(true);return}else if(a==="ghoff"){localStorage.removeItem("lpd-gh");SS="Not connected"}else if(a==="dl"){dlPdf(i);return}
   
-  else if(a==="pic"){picFor=i;return $("#pic").click()}
+  else if(a==="pic"){picFor=i;picK=k||"projects";return $("#pic").click()}
   else if(a==="nopic"){S.projects.find(p=>p.id===i).img=""}
   else if(a==="exp"){if(window.AndroidApp){AndroidApp.share("leslie-dashboard-backup.json",JSON.stringify(S));return}const l=document.createElement("a");l.href="data:application/json,"+encodeURIComponent(JSON.stringify(S));l.download="leslie-dashboard-backup.json";l.click();return}
   save();render();
@@ -232,6 +262,9 @@ document.addEventListener("click",e=>{
 document.addEventListener("submit",e=>{
   e.preventDefault();const f=e.target,v=Object.fromEntries(new FormData(f)),t=f.dataset.f;
   if(t==="gh")return ghConnect(v);
+  if(t==="researcher")return addResearcher(f,v);
+  if(t==="paper")return addPaper(f,v);
+  if(t==="schol")S.scholarships.push({id:id(),n:v.n.trim(),org:(v.o||"").trim(),date:v.d||"",req:(v.r||"").trim()});
   if(t==="task")S.tasks.push({id:id(),t:v.t,due:v.d,done:false,pid:v.p?parseFloat(v.p):undefined});
   if(t==="folder")S.folders.push({id:id(),name:v.n,parent:cwd});
   if(t==="event")S.events.push({id:id(),t:v.t,date:v.d,time:v.tm||"",allday:!!v.ad});
@@ -244,14 +277,11 @@ document.addEventListener("submit",e=>{
 });
 $("#pic").addEventListener("change",e=>{
   const file=e.target.files[0];if(!file)return;
-  const img=new Image();img.onload=()=>{
-    const c=document.createElement("canvas");c.width=480;c.height=270;const x=c.getContext("2d");
-    const s=Math.max(480/img.width,270/img.height),w=img.width*s,h=img.height*s;
-    x.drawImage(img,(480-w)/2,(270-h)/2,w,h);
-    S.projects.find(p=>p.id===picFor).img=c.toDataURL("image/jpeg",.75);save();render();URL.revokeObjectURL(img.src)};
-  img.src=URL.createObjectURL(file);e.target.value="";
+  const K=picK,F=picFor;
+  shrink(file,PIC[K]).then(d=>{const it=S[K].find(p=>p.id===F);if(it){it.img=d;save();render()}}).catch(()=>alert("Could not read that image."));
+  e.target.value="";
 });
-document.addEventListener("change",e=>{const t=e.target;if(t.name==="ad"&&t.form&&t.form.tm){t.form.tm.disabled=t.checked;if(t.checked)t.form.tm.value=""}if(t.name==="nd"&&t.form)t.form.d.disabled=t.checked;if(t.dataset&&t.dataset.a==="mv"&&t.value){const f=S.files.find(x=>x.id===parseFloat(t.dataset.i));if(f){f.folder=t.value==="home"?null:parseFloat(t.value);save();render()}}});
+document.addEventListener("change",e=>{const t=e.target;if(t.type==="file"&&t.dataset.show!==undefined){const sp=t.parentNode.querySelector("span");if(sp)sp.textContent=t.files[0]?t.files[0].name:sp.dataset.d}if(t.dataset&&t.dataset.att&&t.files[0]){const fl=t.files[0];t.value="";attachPdf(parseFloat(t.dataset.att),fl);return}if(t.name==="ad"&&t.form&&t.form.tm){t.form.tm.disabled=t.checked;if(t.checked)t.form.tm.value=""}if(t.name==="nd"&&t.form)t.form.d.disabled=t.checked;if(t.dataset&&t.dataset.a==="mv"&&t.value){const f=S.files.find(x=>x.id===parseFloat(t.dataset.i));if(f){f.folder=t.value==="home"?null:parseFloat(t.value);save();render()}}});
 window.addEventListener("hashchange",()=>{const h=decodeURIComponent(location.hash.slice(1));if(NAMES.includes(h)&&h!==tab){tab=h;render(true)}});
 render(true);
 (()=>{const c=$("#bg"),x=c.getContext("2d");let W,H;
