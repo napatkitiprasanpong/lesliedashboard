@@ -167,6 +167,87 @@ const thumb=p=>p.img?`<img src="${p.img}" alt="">`:esc(p.title[0].toUpperCase())
 
 function shrink(file,o){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const c=document.createElement("canvas"),x=c.getContext("2d");let W=o.w,H=o.h,w,h,dx=0,dy=0;if(o.fit){const k=Math.min(1,W/img.width,H/img.height);W=Math.round(img.width*k);H=Math.round(img.height*k);w=W;h=H}else{const k=Math.max(W/img.width,H/img.height);w=img.width*k;h=img.height*k;dx=(W-w)/2;dy=(H-h)*(o.fy==null?.5:o.fy)}c.width=W;c.height=H;x.drawImage(img,dx,dy,w,h);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.75))};img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("image"))};img.src=u})}
 const PIC={projects:{w:480,h:270},researchers:{w:240,h:240,fy:.3},papers:{w:480,h:360,fit:1}};
+// Starter list for the Biocomputing > Researcher tab: [name, organization, why, link]. Fixed ids (SEED_ID+index) so every device loads the same items without duplicates.
+const SEED_ID=1700000000001;
+const U={hk:"https://engineering.jhu.edu/faculty/thomas-hartung/",cl:"https://en.wikipedia.org/wiki/Cortical_Labs",bw:"https://www.nature.com/articles/s41928-023-01069-w",fs:"https://www.finalspark.com",uc:"https://news.ucsc.edu/2025/10/learning-and-reasoning-potential-of-brain-organoids/",ws:"https://pmc.ncbi.nlm.nih.gov/articles/PMC10013972/",bo:"https://www.biorxiv.org/content/10.64898/2026.09.09.750426v1",jp:"https://sj.jst.go.jp/news/202308/n0825-04k.html",ik:"https://www.nature.com/articles/s41467-024-46787-7",sb:"https://www.softbank.jp/en/corp/technology/research/bpu/",ms:"https://microsoft.com/research/project/neuron-connected-robots",sg:"https://thenextweb.com/news/singapore-biological-data-centre-cortical-labs-neurons"};
+const SEED=[
+["Thomas Hartung","Johns Hopkins University","Coined 'organoid intelligence' and is senior author of the 2023 OI roadmap in Frontiers in Science. The most visible name in the field.",U.hk],
+["Lena Smirnova","Johns Hopkins University","First author of the OI roadmap paper. Works on brain organoids as microphysiological systems for drug and toxicity testing.",U.ws],
+["Brett Kagan","Cortical Labs (Melbourne)","Lead author of DishBrain, neurons learning Pong (Neuron 2022), and co-author of the OI paper. Cortical Labs sells the CL1 biological computer.",U.cl],
+["Hon Weng Chong","Cortical Labs (Melbourne)","Founder and CEO of Cortical Labs. Company face of commercial biocomputing, including the Singapore data center prototype.",U.cl],
+["Feng Guo","Indiana University Bloomington","Led Brainoware, the first brain-organoid reservoir computing demo (speech recognition, Nature Electronics 2023), and the Brainobot robot preprint.",U.bw],
+["Fred Jordan","FinalSpark (Switzerland)","Co-founder of FinalSpark. Its Neuroplatform gives remote access to 16 living organoids.",U.fs],
+["Martin Kutter","FinalSpark (Switzerland)","Co-founder of FinalSpark and the Neuroplatform.",U.fs],
+["Alysson Muotri","UC San Diego","Known for organoids with complex network oscillations. Expects organoid computing prototypes within a few years.","https://spectrum.ieee.org/organoid-intelligence-computing-on-brain"],
+["Tal Sharf","UC Santa Cruz (Braingeneers)","Leads the NSF-funded project building benchmarks and learning tasks for organoid intelligence.",U.uc],
+["Mircea Teodorescu","UC Santa Cruz (Braingeneers)","Co-PI of the NSF award. Builds cloud-connected IoT systems for long-term organoid experiments.",U.uc],
+["David Haussler","UC Santa Cruz (Braingeneers)","Co-PI of the NSF award. Genomics and machine learning leader backing an ethics-first approach.",U.uc],
+["Hirokazu Takahashi","University of Tokyo","Showed physical reservoir computing with living neuron cultures steering a robot. Works with Microsoft and SoftBank projects. Check his current affiliation.","https://www.ne.t.u-tokyo.ac.jp/index-e.html"],
+["Yoshiho Ikeuchi","University of Tokyo (Institute of Industrial Science)","Built 'connectoids', organoids linked by axon bundles, which process information more accurately. Leads the SoftBank Brain Processing Unit work.","yikeuchi@iis.u-tokyo.ac.jp "+U.ik],
+["Sergiu Pasca","Stanford University","Organized the Asilomar organoid meeting and warns against hype around 'organoid intelligence'. Useful critical voice.","https://www.statnews.com/2025/11/17/brain-organoid-pioneers-fear-backlash-over-biocomputing/"],
+["Tony Zador","Cold Spring Harbor Laboratory","Computational neuroscientist who sees organoid intelligence rivaling silicon AI as a dead end. Useful critical voice.","https://www.statnews.com/2025/11/17/brain-organoid-pioneers-fear-backlash-over-biocomputing/"],
+["Brian Caffo","Johns Hopkins University","Co-author of the 2023 OI roadmap paper.",U.ws],
+["David Gracias","Johns Hopkins University","Co-author of the 2023 OI roadmap paper.",U.ws],
+["Qi Huang","Johns Hopkins University","Co-author of the 2023 OI roadmap paper.",U.ws],
+["Itzy Morales Pantoja","Johns Hopkins University","Co-author of the 2023 OI roadmap paper.",U.ws],
+["Bohao Tang","Johns Hopkins University (Biostatistics)","Co-author of the OI roadmap paper and first OI workshop participant.",U.ws],
+["Donald Zack","Johns Hopkins University","Co-author of the 2023 OI roadmap paper.",U.ws],
+["Cynthia Berlinicke","Johns Hopkins University","Co-author of the 2023 OI roadmap paper.",U.ws],
+["Lomax Boyd","Johns Hopkins University","Brain organoid ethics. Co-wrote biological computing ethics papers with Cortical Labs.",U.ws],
+["Timothy Harris","Johns Hopkins University","Co-author of the 2023 OI roadmap paper.",U.ws],
+["Ed Schlesinger","Johns Hopkins (Whiting School of Engineering)","Took part in the first OI workshop.",U.ws],
+["Paul Worley","Johns Hopkins University","Took part in the first OI workshop.",U.ws],
+["Brad Watmuff","Cortical Labs (Melbourne)","Cortical Labs scientist who took part in the first OI workshop.",U.ws],
+["Hongwei Cai","Indiana University Bloomington","First author of the Brainoware (Nature Electronics 2023) and Brainobot papers.",U.bw],
+["Zheng Ao","Indiana University Bloomington","Brainoware co-author.",U.bw],
+["Chunhui Tian","Brainoware team (Indiana / Cincinnati Children's)","Brainoware and Brainobot co-author.",U.bw],
+["Zhuhao Wu","Brainoware team","Brainoware co-author.",U.bw],
+["Hongcheng Liu","Brainoware team","Brainoware co-author.",U.bw],
+["Jason Tchieu","Cincinnati Children's (CuSTOM)","Developed the brain organoids used in Brainoware.",U.bw],
+["Mingxia Gu","Cincinnati Children's (CuSTOM)","Developed the brain organoids used in Brainoware.",U.bw],
+["Ken Mackie","Brainoware team (Indiana University)","Brainoware and Brainobot co-author.",U.bw],
+["Yang Yang","Brainobot team (Indiana University)","Co-author of the Brainobot organoid-controlled robot preprint (2026).",U.bo],
+["Yantao Xing","Brainobot team","Co-author of the Brainobot preprint (2026).",U.bo],
+["Zichen Hong","Brainobot team","Co-author of the Brainobot preprint (2026).",U.bo],
+["Huiyu Chu","Brainobot team","Co-author of the Brainobot preprint (2026).",U.bo],
+["Jiansen Wang","Brainobot team","Co-author of the Brainobot preprint (2026).",U.bo],
+["Jason Meyer","Brainobot team","Co-author of the Brainobot preprint (2026).",U.bo],
+["James Friend","Brainobot team","Co-author of the Brainobot preprint (2026).",U.bo],
+["Lantao Liu","Brainobot team (Indiana University)","Robotics co-author of the Brainobot preprint (2026).",U.bo],
+["Insoo Hyun","NUS Centre for Biomedical Ethics / Hastings Center","Bioethicist. Co-author of Brainobot and author of a Nature comment on the ethics of organoid computers.","https://www.nature.com/articles/d41586-026-02316-8"],
+["Ash Robbins","UC Santa Cruz (Braingeneers)","Led the study training a cortical organoid to solve a pole-balancing task with reinforcement-learning feedback (Cell Reports).",U.uc],
+["Mohammed Mostajo-Radji","UC Santa Cruz (Braingeneers)","Senior co-author on Braingeneers organoid papers.",U.uc],
+["Takuma Sumi","Tohoku University","First author of the PNAS 2023 paper showing cultured neurons act as generalization filters in reservoir computing.",U.jp],
+["Hideaki Yamamoto","Tohoku University","Co-leads the work on cultured neuronal networks as computing reservoirs.",U.jp],
+["Ayumi Hirano-Iwata","Tohoku University","Professor co-leading the cultured-neuron reservoir computing group.",U.jp],
+["Yuichi Katori","Future University Hakodate","Reservoir computing theory partner on the Tohoku work.",U.jp],
+["Yuichiro Yada","University of Tokyo (Takahashi lab)","Co-author of the 2021 living-neuron reservoir computing paper (Applied Physics Letters).","https://publishing.aip.org/publications/latest-content/teaching-robots-to-think-like-us/"],
+["Shusaku Yasuda","University of Tokyo (Takahashi lab)","Co-author of the 2021 living-neuron reservoir computing paper (Applied Physics Letters).","https://publishing.aip.org/publications/latest-content/teaching-robots-to-think-like-us/"],
+["Tatsuya Osaki","University of Tokyo (Ikeuchi lab)","First author of the connected cerebral organoid work.",U.ik],
+["Tomoya Duenki","University of Tokyo (Ikeuchi lab)","Co-author of the connected organoid paper (Nature Communications 2024).",U.ik],
+["Siu Yu A. Chow","University of Tokyo (Ikeuchi lab)","Co-author of the connected organoid paper (Nature Communications 2024).",U.ik],
+["Yasuhiro Ikegami","University of Tokyo (Ikeuchi lab)","Co-author of the connected organoid paper. Project researcher on the organoid circuit work.",U.ik],
+["Nao Nakagawa-Tamagawa","University of Tokyo (Ikeuchi lab)","Co-author of the connected organoid paper (Nature Communications 2024).",U.ik],
+["Yoji Hirano","University of Tokyo (Ikeuchi lab)","Co-author of the connected organoid paper (Nature Communications 2024).",U.ik],
+["Romain Beaubois","LIMMS/CNRS, University of Tokyo","Co-author of the connected organoid paper. Hardware and modeling side.",U.ik],
+["Timothée Levi","LIMMS/CNRS, University of Tokyo","Co-author of the connected organoid paper. Hardware and modeling side.",U.ik],
+["Jun Takamatsu","Microsoft","Works with Takahashi on robots connected to living neurons.",U.ms],
+["Kazuhiro Sasabuchi","Microsoft","Works with Takahashi on robots connected to living neurons.",U.ms],
+["Naoki Wake","Microsoft","Works with Takahashi on robots connected to living neurons.",U.ms],
+["Daito Manabe","Artist, collaborator","Not a researcher. Makes public-facing organoid demos with SoftBank and the Ikeuchi lab.",U.sb],
+["Rickie Patani","NUS Medicine (Life Sciences Institute)","Neuroscientist supervising the cell culture for the 20-unit CL1 biological data center prototype in Singapore.",U.sg],
+["Jamie Khoo","DayOne (Singapore)","CEO of DayOne, partner on the Singapore biological data center prototype.",U.sg],
+["Shi-Yan Ng","A*STAR Genome Institute of Singapore","Adjacent: leads a neural organoid lab. Not organoid computing yet.","https://research.a-star.edu.sg/articles/highlights/spinal-organoids-mimic-neurodegenerative-disease/"],
+["Ng Huck Hui","A*STAR Genome Institute of Singapore","Adjacent: leads the brain organoid theme of the NNI Special Signature Programme.","https://www.nni.com.sg/research-innovation/research-platforms/NNI-special-signature-programme"],
+["Xiaodong Chen","NTU / A*STAR IMRE (Singapore)","Adjacent: built an artificial neuron chip that interfaces with live neurons.","https://research.a-star.edu.sg/articles/highlights/a-deeper-mind-machine-connection/"],
+["Cuntai Guan","NTU Singapore","Adjacent: brain-computer interface and AI researcher.","https://ntu-cbcr.org/personal"],
+["Paris Brown","Duke University","Co-author of a 2026 Nature Computational Science review from algorithms to organoids.","https://www.nature.com/articles/s43588-026-01012-x"],
+["Shyni Varghese","Duke University","Co-author of the 2026 Nature Computational Science review on brain-inspired computing and organoids.","https://www.nature.com/articles/s43588-026-01012-x"],
+["Yucong Duan","Hainan University","Cited the Brainoware work in 2026 research.","https://www.researchgate.net/publication/376413285_Brain_organoid_reservoir_computing_for_artificial_intelligence"],
+["Julian Savulescu","Ethicist","Co-wrote biological computing ethics papers with Cortical Labs.",U.cl]
+];
+const seedMiss=()=>SEED.filter((s,i)=>!S.researchers.some(r=>r.id===SEED_ID+i)&&!S.dead[String(SEED_ID+i)]).length;
+function seedR(){SEED.forEach((s,i)=>{const d=SEED_ID+i;if(S.researchers.some(r=>r.id===d)||S.dead[String(d)])return;S.researchers.push({id:d,name:s[0],uni:s[1],why:s[2],contact:s[3]||"",img:"",imgp:""})})}
 const slug=t=>String(t||"").replace(/[^\w-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40);
 const bpath=(kind,ext,label)=>"biocomputing/"+kind+"/"+String(id()).replace(/\W/g,"_")+(slug(label)?"_"+slug(label):"")+"."+ext;
 const dataBlob=d=>{const p=d.split(","),m=/:(.*?);/.exec(p[0])[1],bin=atob(p[1]),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:m})};
@@ -178,7 +259,7 @@ function imgUrl(p){return IMGC[p]||(IMGC[p]=(async()=>{let b=await fget("img:"+p
 function hydrate(){document.querySelectorAll("img[data-ip]").forEach(el=>{if(el.getAttribute("src"))return;imgUrl(el.dataset.ip).then(u=>{if(el.isConnected&&!el.getAttribute("src"))el.src=u}).catch(()=>{})})}
 async function putPdf(file){if(file.size>25e6){alert(file.name+" is over 25 MB");return null}if(file.type&&file.type!=="application/pdf"){alert(file.name+" is not a PDF");return null}const o={id:id(),name:file.name,size:file.size};try{if(GH()){o.gh=1;o.path=bpath("papers","pdf",file.name.replace(/\.pdf$/i,""));await ghPut(o.path,file)}else await fput(String(o.id),file)}catch(x){alert("Upload failed: "+x.message);return null}return o}
 const busy=f=>{const b=f.querySelector(".btn");if(b){b.disabled=true;b.textContent="Saving..."}};
-async function addResearcher(f,v){const name=(v.name||"").trim();if(!name)return;busy(f);let im={img:"",imgp:""};if(v.photo&&v.photo.size){let d;try{d=await shrink(v.photo,PIC.researchers)}catch(x){render();return alert("Could not read that image.")}im=await putImg(d,"researchers",name);if(!im)return render()}S.researchers.push({id:id(),name,uni:(v.uni||"").trim(),contact:(v.contact||"").trim(),img:im.img,imgp:im.imgp});save();render()}
+async function addResearcher(f,v){const name=(v.name||"").trim();if(!name)return;busy(f);let im={img:"",imgp:""};if(v.photo&&v.photo.size){let d;try{d=await shrink(v.photo,PIC.researchers)}catch(x){render();return alert("Could not read that image.")}im=await putImg(d,"researchers",name);if(!im)return render()}S.researchers.push({id:id(),name,uni:(v.uni||"").trim(),contact:(v.contact||"").trim(),why:(v.why||"").trim(),img:im.img,imgp:im.imgp});save();render()}
 async function addPaper(f,v){const title=(v.title||"").trim();if(!title)return;busy(f);let im={img:"",imgp:""};if(v.photo&&v.photo.size){let d;try{d=await shrink(v.photo,PIC.papers)}catch(x){render();return alert("Could not read that image.")}im=await putImg(d,"papers",title);if(!im)return render()}let pdf=null;if(v.pdf&&v.pdf.size){pdf=await putPdf(v.pdf);if(!pdf){delImg({imgp:im.imgp});return render()}}S.papers.push({id:id(),title,img:im.img,imgp:im.imgp,pdf});save();render()}
 async function attachPdf(i,file){const p=S.papers.find(x=>x.id===i);if(!p||p.pdf)return;const r=await putPdf(file);if(!r)return;p.pdf=r;save();render()}
 // Moves pictures and PDFs saved before GitHub was connected (or inside the data file) into the repo.
@@ -253,8 +334,8 @@ Biocomputing(){
   const fp=(n,lab,acc)=>`<label class="ghost fl"><span data-d="${lab}">${lab}</span><input type="file" name="${n}" accept="${acc}" data-show hidden></label>`;
   const hasImg=x=>!!(x.img||x.imgp);
   const imgOf=(x,alt)=>x.imgp?`<img data-ip="${esc(x.imgp)}" alt="${esc(alt)}">`:x.img?`<img src="${esc(x.img)}" alt="${esc(alt)}">`:"";
-  if(bsub==="Researcher")return nav+`<form class="bf" data-f="researcher"><input name="name" placeholder="Name" required style="flex:2 1 160px"><input name="uni" placeholder="University / organization" style="flex:2 1 180px"><input name="contact" placeholder="Contact (email, link, phone)" style="flex:3 1 220px">${fp("photo","Photo","image/*")}<button class="btn">Add researcher</button></form>`+
-  (S.researchers.length?`<div class="grid bio">${S.researchers.map(r=>`<div class="pc"><div class="th sq">${imgOf(r,r.name)||esc(r.name[0].toUpperCase())}</div><div class="pb"><b>${esc(r.name)}</b><div class="mut">${esc(r.uni||"")}</div><div class="mut" style="margin-top:4px">${ct(r.contact)}</div></div><div class="pa"><button class="ghost" data-a="pic" data-k="researchers" data-i="${r.id}">${hasImg(r)?"Change photo":"Add photo"}</button><button class="ghost" data-a="del" data-k="researchers" data-i="${r.id}">Delete</button></div></div>`).join("")}</div>`:empty("No researchers yet. Add the people you want to follow or contact."));
+  if(bsub==="Researcher")return nav+(seedMiss()?`<div class="card" style="margin-bottom:12px"><div class="mut">Starter list: ${seedMiss()} researchers from your research (name, organization, why, source link).</div><div class="foot"><button class="btn" data-a="seed">Load starter list (${seedMiss()})</button></div></div>`:"")+`<form class="bf" data-f="researcher"><input name="name" placeholder="Name" required style="flex:2 1 160px"><input name="uni" placeholder="University / organization" style="flex:2 1 180px"><input name="contact" placeholder="Contact (email, link, phone)" style="flex:3 1 220px"><textarea name="why" rows="2" placeholder="Why (why this person matters to you)" style="flex:1 1 100%"></textarea>${fp("photo","Photo","image/*")}<button class="btn">Add researcher</button></form>`+
+  (S.researchers.length?`<div class="grid bio">${S.researchers.map(r=>`<div class="pc"><div class="th sq">${imgOf(r,r.name)||esc(r.name[0].toUpperCase())}</div><div class="pb"><b>${esc(r.name)}</b><div class="mut">${esc(r.uni||"")}</div><div class="mut" style="margin-top:4px">${ct(r.contact)}</div>${r.why?`<div class="pre" style="margin-top:8px;font-size:13px"><b class="out">Why:</b> ${esc(r.why)}</div>`:""}</div><div class="pa"><button class="ghost" data-a="pic" data-k="researchers" data-i="${r.id}">${hasImg(r)?"Change photo":"Add photo"}</button><button class="ghost" data-a="del" data-k="researchers" data-i="${r.id}">Delete</button></div></div>`).join("")}</div>`:empty("No researchers yet. Add the people you want to follow or contact."));
   if(bsub==="Paper")return nav+`<form class="bf" data-f="paper"><input name="title" placeholder="Paper title" required style="flex:3 1 240px">${fp("photo","Picture","image/*")}${fp("pdf","PDF","application/pdf")}<button class="btn">Add paper</button></form>`+
   (S.papers.length?`<div class="grid bio">${S.papers.map(p=>`<div class="pc"><div class="th pp">${imgOf(p,p.title)||esc(p.title[0].toUpperCase())}</div><div class="pb"><b>${esc(p.title)}</b><div class="mut">${p.pdf?esc(p.pdf.name)+" · "+(p.pdf.size/1048576).toFixed(1)+" MB":"No PDF attached"}</div></div><div class="pa">${p.pdf?`<button class="ghost" data-a="open" data-i="${p.pdf.id}">Open</button><button class="ghost" data-a="dl" data-i="${p.pdf.id}">Download</button>`:`<label class="ghost fl"><span>Attach PDF</span><input type="file" accept="application/pdf" data-att="${p.id}" hidden></label>`}<button class="ghost" data-a="pic" data-k="papers" data-i="${p.id}">${hasImg(p)?"Change picture":"Add picture"}</button><button class="ghost" data-a="del" data-k="papers" data-i="${p.id}">Delete</button></div></div>`).join("")}</div>`:empty("No papers yet. Add a title with a picture and a PDF."));
   const L=[...S.scholarships].sort((a,b)=>(pst(a)-pst(b))||(a.date||"9").localeCompare(b.date||"9"));
@@ -277,7 +358,7 @@ document.addEventListener("click",e=>{
   const a=b.dataset.a,i=parseFloat(b.dataset.i),k=b.dataset.k;
   if(a==="tg"){const t=S.tasks.find(t=>t.id===i);t.done=!t.done}
   else if(a==="del"){if(k==="papers"||k==="researchers"){const it=S[k].find(x=>x.id===i);if(it){if(it.pdf){if(!confirm("Delete this paper and its PDF?"))return;fdel(String(it.pdf.id));if(it.pdf.gh)ghDel(ghp(it.pdf)).catch(()=>{})}delImg(it)}}if(k==="folders"&&(S.folders.some(f=>f.parent===i)||S.files.some(f=>f.folder===i)))return alert("Folder is not empty.");if(k==="files"){const f=S.files.find(x=>x.id===i);fdel(String(i));if(f&&f.gh)ghDel(ghp(f)).catch(()=>{})}S[k]=S[k].filter(x=>x.id!==i)}
-  else if(a==="day"){sel=k}else if(a==="bsub"){bsub=k}
+  else if(a==="day"){sel=k}else if(a==="bsub"){bsub=k}else if(a==="seed"){seedR()}
   else if(a==="goto"){sel=k;const d=new Date(k+"T00:00");cm=new Date(d.getFullYear(),d.getMonth(),1);tab="Calendar";try{location.hash=tab}catch(x){}scrollTo(0,0);return render(true)}
   else if(a==="mo"){cm.setMonth(cm.getMonth()+ +k)}
   else if(a==="ptask"){openP=i}else if(a==="pback"){openP=null}else if(a==="cd"){cwd=i||null}else if(a==="open"){openPdf(i);return}else if(a==="sync"){sync(true);return}else if(a==="ghoff"){localStorage.removeItem("lpd-gh");SS="Not connected"}else if(a==="dl"){dlPdf(i);return}
