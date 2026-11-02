@@ -12,7 +12,7 @@ html{margin:0;background:#000}body{margin:0;background:transparent;color:var(--t
 #bg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;background:#000}
 #load{position:fixed;inset:0;z-index:99;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s}#load.x{opacity:0;pointer-events:none}#lb{display:flex;gap:8px}
 .spin{width:54px;height:54px;border-radius:50%;border:4px solid rgba(255,255,255,.1);border-top-color:var(--red2);animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
-.pv{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column}.pv iframe{flex:1;border:0;background:#222}.pvh{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px}a.ghost{text-decoration:none;display:inline-block}
+.pv{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column}.pv iframe{flex:1;border:0;background:#222}.pvh{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px}.pvh b{min-width:0;overflow-wrap:anywhere}a.ghost{text-decoration:none;display:inline-block}
 @keyframes up{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes ring{from{stroke-dashoffset:327}}
 @keyframes pop{50%{transform:scale(1.35)}}
@@ -69,7 +69,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--red2);box-shadow:0 0 
 .pa{display:flex;gap:6px;padding:0 14px 14px;flex-wrap:wrap}
 .foot{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap}
 .sub{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.sub .ghost{padding:8px 14px;font-size:14px}.sub .ghost.on{color:#fff;border-color:var(--red2);background:linear-gradient(90deg,rgba(225,29,46,.55),rgba(225,29,46,.12))}
-.th.sq{aspect-ratio:1/1}.th.pp{aspect-ratio:4/3}.th.pp img{object-fit:contain;background:#000}
+.th img:not([src]){opacity:0}.th.sq{aspect-ratio:1/1}.th.pp{aspect-ratio:4/3}.th.pp img{object-fit:contain;background:#000}
 .fl{display:inline-flex;align-items:center;gap:6px;cursor:pointer;max-width:200px}.fl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pre{white-space:pre-wrap;overflow-wrap:anywhere}a.lk{color:var(--red2);text-decoration:none;overflow-wrap:anywhere}a.lk:hover{text-decoration:underline}
 @media(max-width:760px){
@@ -78,8 +78,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--red2);box-shadow:0 0 
  .brand{display:none}
  aside button{flex-direction:column;gap:2px;font-size:10px;padding:6px 5px;flex:1 0 auto;text-align:center;justify-content:center}
  aside button:hover{transform:none}aside button.on{box-shadow:inset 0 3px var(--red2)}
- main{margin:0;padding:calc(22px + env(safe-area-inset-top,0px)) 14px 100px}
+ main{margin:0;padding:calc(22px + env(safe-area-inset-top,0px)) 14px calc(96px + env(safe-area-inset-bottom,0px))}
+ input,select,textarea{font-size:16px}
+ .grid.bio{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .grid.bio .pb{padding:10px}
+ .grid.bio .pa{padding:0 10px 10px;gap:6px}
+ .grid.bio .pa .ghost{flex:1 1 auto;text-align:center;padding:9px 8px}
+ .sub{flex-wrap:nowrap}.sub .ghost{flex:1 1 0;min-width:0;padding:12px 4px;font-size:13px;text-align:center}
+ .bf input,.bf textarea{flex:1 1 100%!important}
+ .bf .btn,.bf .fl{flex:1 1 100%;max-width:none;justify-content:center;padding:13px}
+ .bf .fl{border-style:dashed}
+ .pb{padding:10px 12px}
+ .pt{font-size:26px}
 }
+@media(hover:none){.pc:hover,.row:hover,.st:hover,.btn:hover{transform:none;box-shadow:none}.pc:hover .th img{transform:none}aside button:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -107,7 +119,7 @@ async function ghPut(path,file){const c=GH(),b64=await new Promise((res,rej)=>{c
 async function ghDel(path){const c=GH(),r=await ghFetch("/contents/"+path,{q:br(c),ok404:true});if(r.status===404)return;const j=await r.json();await ghFetch("/contents/"+path,{method:"DELETE",body:{message:"delete "+path,sha:j.sha,branch:c.branch||"main"}})}
 async function ghConnect(v){const cfg={repo:v.r.trim().replace(/^https?:\/\/github\.com\//,"").replace(/\/$/,""),token:v.t.trim(),branch:(v.b||"main").trim()};localStorage.setItem("lpd-gh",JSON.stringify(cfg));try{await ghFetch("");await sync(true);render()}catch(e){localStorage.removeItem("lpd-gh");alert(e.status===404?"Repo not found. Check the name and that the token can access it.":e.status===401?"GitHub rejected the token.":"Could not connect: "+e.message)}}
 function ghCard(){const c=GH();return `<div class="card" style="margin:12px 0"><h3>GitHub sync</h3>`+(c?`<div class="mut">Connected to <b>${esc(c.repo)}</b> (${esc(c.branch||"main")}). <span id="ss">${esc(SS)}</span></div><div class="foot"><button class="ghost" data-a="sync">Sync now</button><button class="ghost" data-a="ghoff">Disconnect</button></div>`:`<form data-f="gh"><input name="r" placeholder="username/your-data-repo" required><input name="t" type="password" placeholder="Access token" required><input name="b" placeholder="Branch (main)" style="flex:0 1 120px"><button class="btn">Connect</button></form><div class="mut">Use a private repo and a token with Contents read and write. See README.</div>`)+`</div>`}
-const ghp=f=>"files/"+String(f.id).replace(/\W/g,"_")+".pdf";
+const ghp=f=>f.path||"files/"+String(f.id).replace(/\W/g,"_")+".pdf";
 async function getPdf(f){if(f.gh){const c=GH();if(!c)throw 0;return(await ghFetch("/contents/"+ghp(f),{q:br(c),raw:true})).blob()}return fget(String(f.id))}
 const findPdf=i=>S.files.find(x=>x.id===i)||(S.papers.find(p=>p.pdf&&p.pdf.id===i)||{}).pdf;
 async function dlPdf(i){const f=findPdf(i),b=await getPdf(f).catch(()=>null);if(!b)return alert("Could not get this PDF. Check your GitHub connection.");const u=URL.createObjectURL(new Blob([b],{type:"application/pdf"})),a=document.createElement("a");a.href=u;a.download=f.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
@@ -121,7 +133,7 @@ const locSave=()=>{try{localStorage.setItem("lpd",JSON.stringify(S))}catch(e){}}
 const save=()=>{stamp();locSave();if(NAT){clearTimeout(pt);pt=setTimeout(()=>sync(),1500)}};
 COLS.forEach(k=>S[k].forEach(it=>{if(!it.u)it.u=1}));rebuild();
 let sq=Promise.resolve();function sync(m){return sq=sq.then(()=>doSync(m),()=>doSync(m))}
-async function doSync(manual){if(!NAT)return false;try{if(!await NAT.has()){SS="GitHub not connected";return false}const t=await NAT.read(),remote=t?JSON.parse(t):null,m=remote?merge(S,remote):S,ch=norm(m)!==norm(S);if(ch){Object.assign(S,m);rebuild();locSave()}if(!remote||norm(remote)!==norm(m))await NAT.write(JSON.stringify(S));SS="Synced "+new Date().toLocaleTimeString();const s=$("#ss");if(s)s.textContent=SS;if(ch)render();return true}catch(e){SS="Sync failed";const s=$("#ss");if(s)s.textContent=SS;return false}}
+async function doSync(manual){if(!NAT)return false;try{if(!await NAT.has()){SS="GitHub not connected";return false}const t=await NAT.read(),remote=t?JSON.parse(t):null,m=remote?merge(S,remote):S,ch=norm(m)!==norm(S);if(ch){Object.assign(S,m);rebuild();locSave()}if(!remote||norm(remote)!==norm(m))await NAT.write(JSON.stringify(S));SS="Synced "+new Date().toLocaleTimeString();const s=$("#ss");if(s)s.textContent=SS;if(ch)render();migrateImgs();return true}catch(e){SS="Sync failed";const s=$("#ss");if(s)s.textContent=SS;return false}}
 async function pickSync(){if(await NAT.pick())await sync(true)}
 
 async function boot(){const L=$("#load");if(!GH()){L.remove();return}await Promise.race([sync(),new Promise(r=>setTimeout(r,8000))]);L.classList.add("x");setTimeout(()=>L.remove(),500);render(true)}
@@ -143,7 +155,7 @@ const fput=async(k,b)=>{const d=await idb();return new Promise(r=>{const t=d.tra
 const fget=async k=>{const d=await idb();return new Promise(r=>{const q=d.transaction("f").objectStore("f").get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})};
 const fdel=async k=>{try{const d=await idb();d.transaction("f","readwrite").objectStore("f").delete(k)}catch(e){}};
 async function upload(e){for(const f of e.target.files){if(f.size>25e6){alert(f.name+" is over 25 MB");continue}const i=id(),it={id:i,name:f.name,size:f.size,folder:cwd};if(GH()){try{it.gh=1;await ghPut(ghp(it),f)}catch(x){alert("Upload failed: "+x.message);continue}}else await fput(String(i),f);S.files.push(it)}e.target.value="";save();render()}
-async function openPdf(i){const f=findPdf(i),b=await getPdf(f).catch(()=>null);if(!b)return alert("This PDF is not on this device. Open it on the device where you added it.");const u=URL.createObjectURL(new Blob([b],{type:"application/pdf"})),v=document.createElement("div");v.className="pv";v.innerHTML=`<div class="pvh"><b>${esc(f.name)}</b><span><a class="ghost" download="${esc(f.name)}" href="${u}">Download</a> <button class="ghost" id="pvx">Close</button></span></div><iframe src="${u}"></iframe>`;document.body.append(v);$("#pvx").onclick=()=>{v.remove();URL.revokeObjectURL(u)}}
+async function openPdf(i){const f=findPdf(i),b=await getPdf(f).catch(()=>null);if(!b)return alert("This PDF is not on this device. Open it on the device where you added it.");const u=URL.createObjectURL(new Blob([b],{type:"application/pdf"})),v=document.createElement("div");v.className="pv";v.innerHTML=`<div class="pvh"><b>${esc(f.name)}</b><span><a class="ghost" target="_blank" rel="noopener" href="${u}">New tab</a> <a class="ghost" download="${esc(f.name)}" href="${u}">Download</a> <button class="ghost" id="pvx">Close</button></span></div><iframe src="${u}"></iframe>`;document.body.append(v);$("#pvx").onclick=()=>{v.remove();URL.revokeObjectURL(u)}}
 function repoInfo(v){
   v=v.trim().replace(/\.git$/,"").replace(/\/$/,"");
   const m=v.match(/github\.com\/([\w.-]+)\/([\w.-]+)/)||v.match(/^([\w.-]+)\/([\w.-]+)$/);
@@ -155,11 +167,23 @@ const thumb=p=>p.img?`<img src="${p.img}" alt="">`:esc(p.title[0].toUpperCase())
 
 function shrink(file,o){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const c=document.createElement("canvas"),x=c.getContext("2d");let W=o.w,H=o.h,w,h,dx=0,dy=0;if(o.fit){const k=Math.min(1,W/img.width,H/img.height);W=Math.round(img.width*k);H=Math.round(img.height*k);w=W;h=H}else{const k=Math.max(W/img.width,H/img.height);w=img.width*k;h=img.height*k;dx=(W-w)/2;dy=(H-h)*(o.fy==null?.5:o.fy)}c.width=W;c.height=H;x.drawImage(img,dx,dy,w,h);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.75))};img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("image"))};img.src=u})}
 const PIC={projects:{w:480,h:270},researchers:{w:240,h:240,fy:.3},papers:{w:480,h:360,fit:1}};
-async function putPdf(file){if(file.size>25e6){alert(file.name+" is over 25 MB");return null}if(file.type&&file.type!=="application/pdf"){alert(file.name+" is not a PDF");return null}const o={id:id(),name:file.name,size:file.size};try{if(GH()){o.gh=1;await ghPut(ghp(o),file)}else await fput(String(o.id),file)}catch(x){alert("Upload failed: "+x.message);return null}return o}
+const slug=t=>String(t||"").replace(/[^\w-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40);
+const bpath=(kind,ext,label)=>"biocomputing/"+kind+"/"+String(id()).replace(/\W/g,"_")+(slug(label)?"_"+slug(label):"")+"."+ext;
+const dataBlob=d=>{const p=d.split(","),m=/:(.*?);/.exec(p[0])[1],bin=atob(p[1]),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:m})};
+// Pictures: saved as real files in the connected GitHub repo (biocomputing/...). Without GitHub they stay inside the local data.
+async function putImg(d,kind,label,quiet){if(!GH())return{img:d,imgp:""};const p=bpath(kind,"jpg",label),b=dataBlob(d);try{await ghPut(p,b)}catch(x){if(!quiet)alert("Picture upload failed: "+x.message);return null}fput("img:"+p,b).catch(()=>{});return{img:"",imgp:p}}
+const delImg=it=>{if(it&&it.imgp){fdel("img:"+it.imgp);if(GH())ghDel(it.imgp).catch(()=>{})}};
+const IMGC={};
+function imgUrl(p){return IMGC[p]||(IMGC[p]=(async()=>{let b=await fget("img:"+p).catch(()=>null);if(!b){const c=GH();if(!c)throw 0;b=await(await ghFetch("/contents/"+p,{q:br(c),raw:true})).blob();fput("img:"+p,b).catch(()=>{})}return URL.createObjectURL(b)})().catch(e=>{delete IMGC[p];throw e}))}
+function hydrate(){document.querySelectorAll("img[data-ip]").forEach(el=>{if(el.getAttribute("src"))return;imgUrl(el.dataset.ip).then(u=>{if(el.isConnected&&!el.getAttribute("src"))el.src=u}).catch(()=>{})})}
+async function putPdf(file){if(file.size>25e6){alert(file.name+" is over 25 MB");return null}if(file.type&&file.type!=="application/pdf"){alert(file.name+" is not a PDF");return null}const o={id:id(),name:file.name,size:file.size};try{if(GH()){o.gh=1;o.path=bpath("papers","pdf",file.name.replace(/\.pdf$/i,""));await ghPut(o.path,file)}else await fput(String(o.id),file)}catch(x){alert("Upload failed: "+x.message);return null}return o}
 const busy=f=>{const b=f.querySelector(".btn");if(b){b.disabled=true;b.textContent="Saving..."}};
-async function addResearcher(f,v){const name=(v.name||"").trim();if(!name)return;busy(f);let img="";if(v.photo&&v.photo.size){try{img=await shrink(v.photo,PIC.researchers)}catch(x){render();return alert("Could not read that image.")}}S.researchers.push({id:id(),name,uni:(v.uni||"").trim(),contact:(v.contact||"").trim(),img});save();render()}
-async function addPaper(f,v){const title=(v.title||"").trim();if(!title)return;busy(f);const o={id:id(),title,img:"",pdf:null};if(v.photo&&v.photo.size){try{o.img=await shrink(v.photo,PIC.papers)}catch(x){render();return alert("Could not read that image.")}}if(v.pdf&&v.pdf.size){const r=await putPdf(v.pdf);if(!r)return render();o.pdf=r}S.papers.push(o);save();render()}
+async function addResearcher(f,v){const name=(v.name||"").trim();if(!name)return;busy(f);let im={img:"",imgp:""};if(v.photo&&v.photo.size){let d;try{d=await shrink(v.photo,PIC.researchers)}catch(x){render();return alert("Could not read that image.")}im=await putImg(d,"researchers",name);if(!im)return render()}S.researchers.push({id:id(),name,uni:(v.uni||"").trim(),contact:(v.contact||"").trim(),img:im.img,imgp:im.imgp});save();render()}
+async function addPaper(f,v){const title=(v.title||"").trim();if(!title)return;busy(f);let im={img:"",imgp:""};if(v.photo&&v.photo.size){let d;try{d=await shrink(v.photo,PIC.papers)}catch(x){render();return alert("Could not read that image.")}im=await putImg(d,"papers",title);if(!im)return render()}let pdf=null;if(v.pdf&&v.pdf.size){pdf=await putPdf(v.pdf);if(!pdf){delImg({imgp:im.imgp});return render()}}S.papers.push({id:id(),title,img:im.img,imgp:im.imgp,pdf});save();render()}
 async function attachPdf(i,file){const p=S.papers.find(x=>x.id===i);if(!p||p.pdf)return;const r=await putPdf(file);if(!r)return;p.pdf=r;save();render()}
+// Moves pictures and PDFs saved before GitHub was connected (or inside the data file) into the repo.
+let mig=false;
+async function migrateImgs(){if(mig||!GH())return;mig=true;let n=0;try{for(const k of["researchers","papers"])for(const it of S[k])if(typeof it.img==="string"&&it.img.startsWith("data:")){const r=await putImg(it.img,k,it.name||it.title,true);if(r&&r.imgp){it.img="";it.imgp=r.imgp;n++}}for(const it of S.papers)if(it.pdf&&!it.pdf.gh){const b=await fget(String(it.pdf.id)).catch(()=>null);if(!b)continue;const q=bpath("papers","pdf",it.pdf.name.replace(/\.pdf$/i,""));try{await ghPut(q,b);it.pdf.gh=1;it.pdf.path=q;fdel(String(it.pdf.id));n++}catch(e){}}}finally{mig=false}if(n){save();render()}}
 const ct=s=>esc(s||"").replace(/(https?:\/\/[^\s<]*[^\s<.,;:)]|www\.[^\s<]*[^\s<.,;:)])|([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/gi,(m,u,em)=>u?`<a class="lk" href="${/^www\./i.test(u)?"https://"+u:u}" target="_blank" rel="noopener">${u}</a>`:`<a class="lk" href="mailto:${em}">${em}</a>`);
 const dleft=d=>Math.round((new Date(d+"T00:00")-new Date(today+"T00:00"))/864e5);
 const fdate=d=>new Date(d+"T00:00").toLocaleDateString("en",{year:"numeric",month:"short",day:"numeric"});
@@ -224,23 +248,27 @@ Project(){if(openP&&pj(openP))return projDetail();
 },
 Biocomputing(){
   const SUBS=["Researcher","Paper","Scholarship"],cnt=[S.researchers.length,S.papers.length,S.scholarships.length];
-  const nav=`<div class="sub">${SUBS.map((n,j)=>`<button class="ghost ${n===bsub?"on":""}" data-a="bsub" data-k="${n}">${n} (${cnt[j]})</button>`).join("")}</div>`;
+  const warn=GH()?"":`<div class="card" style="margin-bottom:12px"><div class="mut">GitHub is not connected on this device, so pictures and PDFs are saved on this device only. <button class="ghost" data-tab="Dashboard">Connect GitHub</button></div></div>`;
+  const nav=warn+`<div class="sub">${SUBS.map((n,j)=>`<button class="ghost ${n===bsub?"on":""}" data-a="bsub" data-k="${n}">${n} (${cnt[j]})</button>`).join("")}</div>`;
   const fp=(n,lab,acc)=>`<label class="ghost fl"><span data-d="${lab}">${lab}</span><input type="file" name="${n}" accept="${acc}" data-show hidden></label>`;
-  if(bsub==="Researcher")return nav+`<form data-f="researcher"><input name="name" placeholder="Name" required style="flex:2 1 160px"><input name="uni" placeholder="University / organization" style="flex:2 1 180px"><input name="contact" placeholder="Contact (email, link, phone)" style="flex:3 1 220px">${fp("photo","Photo","image/*")}<button class="btn">Add researcher</button></form>`+
-  (S.researchers.length?`<div class="grid">${S.researchers.map(r=>`<div class="pc"><div class="th sq">${r.img?`<img src="${esc(r.img)}" alt="${esc(r.name)}">`:esc(r.name[0].toUpperCase())}</div><div class="pb"><b>${esc(r.name)}</b><div class="mut">${esc(r.uni||"")}</div><div class="mut" style="margin-top:4px">${ct(r.contact)}</div></div><div class="pa"><button class="ghost" data-a="pic" data-k="researchers" data-i="${r.id}">${r.img?"Change photo":"Add photo"}</button><button class="ghost" data-a="del" data-k="researchers" data-i="${r.id}">Delete</button></div></div>`).join("")}</div>`:empty("No researchers yet. Add the people you want to follow or contact."));
-  if(bsub==="Paper")return nav+`<form data-f="paper"><input name="title" placeholder="Paper title" required style="flex:3 1 240px">${fp("photo","Picture","image/*")}${fp("pdf","PDF","application/pdf")}<button class="btn">Add paper</button></form>`+
-  (S.papers.length?`<div class="grid">${S.papers.map(p=>`<div class="pc"><div class="th pp">${p.img?`<img src="${esc(p.img)}" alt="">`:esc(p.title[0].toUpperCase())}</div><div class="pb"><b>${esc(p.title)}</b><div class="mut">${p.pdf?esc(p.pdf.name)+" · "+(p.pdf.size/1048576).toFixed(1)+" MB":"No PDF attached"}</div></div><div class="pa">${p.pdf?`<button class="ghost" data-a="open" data-i="${p.pdf.id}">Open</button><button class="ghost" data-a="dl" data-i="${p.pdf.id}">Download</button>`:`<label class="ghost fl"><span>Attach PDF</span><input type="file" accept="application/pdf" data-att="${p.id}" hidden></label>`}<button class="ghost" data-a="pic" data-k="papers" data-i="${p.id}">${p.img?"Change picture":"Add picture"}</button><button class="ghost" data-a="del" data-k="papers" data-i="${p.id}">Delete</button></div></div>`).join("")}</div>`:empty("No papers yet. Add a title with a picture and a PDF."));
+  const hasImg=x=>!!(x.img||x.imgp);
+  const imgOf=(x,alt)=>x.imgp?`<img data-ip="${esc(x.imgp)}" alt="${esc(alt)}">`:x.img?`<img src="${esc(x.img)}" alt="${esc(alt)}">`:"";
+  if(bsub==="Researcher")return nav+`<form class="bf" data-f="researcher"><input name="name" placeholder="Name" required style="flex:2 1 160px"><input name="uni" placeholder="University / organization" style="flex:2 1 180px"><input name="contact" placeholder="Contact (email, link, phone)" style="flex:3 1 220px">${fp("photo","Photo","image/*")}<button class="btn">Add researcher</button></form>`+
+  (S.researchers.length?`<div class="grid bio">${S.researchers.map(r=>`<div class="pc"><div class="th sq">${imgOf(r,r.name)||esc(r.name[0].toUpperCase())}</div><div class="pb"><b>${esc(r.name)}</b><div class="mut">${esc(r.uni||"")}</div><div class="mut" style="margin-top:4px">${ct(r.contact)}</div></div><div class="pa"><button class="ghost" data-a="pic" data-k="researchers" data-i="${r.id}">${hasImg(r)?"Change photo":"Add photo"}</button><button class="ghost" data-a="del" data-k="researchers" data-i="${r.id}">Delete</button></div></div>`).join("")}</div>`:empty("No researchers yet. Add the people you want to follow or contact."));
+  if(bsub==="Paper")return nav+`<form class="bf" data-f="paper"><input name="title" placeholder="Paper title" required style="flex:3 1 240px">${fp("photo","Picture","image/*")}${fp("pdf","PDF","application/pdf")}<button class="btn">Add paper</button></form>`+
+  (S.papers.length?`<div class="grid bio">${S.papers.map(p=>`<div class="pc"><div class="th pp">${imgOf(p,p.title)||esc(p.title[0].toUpperCase())}</div><div class="pb"><b>${esc(p.title)}</b><div class="mut">${p.pdf?esc(p.pdf.name)+" · "+(p.pdf.size/1048576).toFixed(1)+" MB":"No PDF attached"}</div></div><div class="pa">${p.pdf?`<button class="ghost" data-a="open" data-i="${p.pdf.id}">Open</button><button class="ghost" data-a="dl" data-i="${p.pdf.id}">Download</button>`:`<label class="ghost fl"><span>Attach PDF</span><input type="file" accept="application/pdf" data-att="${p.id}" hidden></label>`}<button class="ghost" data-a="pic" data-k="papers" data-i="${p.id}">${hasImg(p)?"Change picture":"Add picture"}</button><button class="ghost" data-a="del" data-k="papers" data-i="${p.id}">Delete</button></div></div>`).join("")}</div>`:empty("No papers yet. Add a title with a picture and a PDF."));
   const L=[...S.scholarships].sort((a,b)=>(pst(a)-pst(b))||(a.date||"9").localeCompare(b.date||"9"));
-  return nav+`<form data-f="schol"><input name="n" placeholder="Scholarship name" required style="flex:3 1 220px"><input name="o" placeholder="Organization" style="flex:2 1 180px"><input name="d" type="date" aria-label="Deadline"><textarea name="r" rows="3" placeholder="Requirements" style="flex:1 1 100%"></textarea><button class="btn">Add scholarship</button></form>`+
-  (L.length?L.map(s=>{const n=s.date?dleft(s.date):0,w=n<0?"Closed "+(-n)+(n===-1?" day":" days")+" ago":n===0?"Due today":n===1?"Due tomorrow":n+" days left";return `<div class="card" style="margin-bottom:10px${pst(s)?";opacity:.6":""}"><div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap"><div style="min-width:0"><b style="font-size:16px">${esc(s.n)}</b><div class="mut">${esc(s.org||"No organization")}</div></div><div style="text-align:right">${s.date?`<div><b>${fdate(s.date)}</b></div><div class="${n<0?"mut":n<=14?"out":"in"}">${w}</div>`:'<div class="mut">No date</div>'}</div></div>${s.req?`<div class="pre" style="margin-top:10px">${esc(s.req)}</div>`:""}<div class="foot" style="margin-top:12px"><button class="ghost" data-a="del" data-k="scholarships" data-i="${s.id}">Delete</button></div></div>`}).join(""):empty("No scholarships yet. Add the date, requirements and organization."));
+  return nav+`<form class="bf" data-f="schol"><input name="n" placeholder="Scholarship name" required style="flex:3 1 220px"><input name="o" placeholder="Organization" style="flex:2 1 180px"><input name="d" type="date" aria-label="Deadline"><textarea name="r" rows="3" placeholder="Requirements" style="flex:1 1 100%"></textarea><button class="btn">Add scholarship</button></form>`+
+  (L.length?L.map(s=>{const n=s.date?dleft(s.date):0,w=n<0?"Closed "+(-n)+(n===-1?" day":" days")+" ago":n===0?"Due today":n===1?"Due tomorrow":n+" days left";return `<div class="card" style="margin-bottom:10px${pst(s)?";opacity:.6":""}"><div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap"><div style="min-width:0"><b style="font-size:16px;overflow-wrap:anywhere">${esc(s.n)}</b><div class="mut">${esc(s.org||"No organization")}</div></div><div style="text-align:right">${s.date?`<div><b>${fdate(s.date)}</b></div><div class="${n<0?"mut":n<=14?"out":"in"}">${w}</div>`:'<div class="mut">No date</div>'}</div></div>${s.req?`<div class="pre" style="margin-top:10px">${esc(s.req)}</div>`:""}<div class="foot" style="margin-top:12px"><button class="ghost" data-a="del" data-k="scholarships" data-i="${s.id}">Delete</button></div></div>`}).join(""):empty("No scholarships yet. Add the date, requirements and organization."));
 }};
 
 function render(enter){
-  $("#nav").innerHTML=`<div class="brand">Leslie <b>Project</b> Dashboard<span>Your local workspace</span></div>`+TABS.map(t=>`<button class="${t[0]===tab?"on":""}" data-tab="${t[0]}"><em>${t[1]}</em>${t[0]}</button>`).join("");
+  const nv=$("#nav"),sl=nv.scrollLeft;nv.innerHTML=`<div class="brand">Leslie <b>Project</b> Dashboard<span>Your local workspace</span></div>`+TABS.map(t=>`<button class="${t[0]===tab?"on":""}" data-tab="${t[0]}"><em>${t[1]}</em>${t[0]}</button>`).join("");nv.scrollLeft=sl;{const on=nv.querySelector(".on");if(on){const l=on.offsetLeft,w=on.offsetWidth;if(l<nv.scrollLeft||l+w>nv.scrollLeft+nv.clientWidth)nv.scrollLeft=l-(nv.clientWidth-w)/2}}
   $("#view").innerHTML=(tab==="Dashboard"?"":`<h2 class="pt">${tab}</h2>`)+V[tab]();
   const imp=$("#imp");if(imp)imp.onchange=e=>{const r=new FileReader();r.onload=()=>{try{Object.assign(S,merge(S,JSON.parse(r.result)));COLS.forEach(k=>S[k].forEach(it=>{if(!it.u)it.u=1}));rebuild();save();render()}catch(x){alert("That file is not a valid backup.")}};r.readAsText(e.target.files[0])};
   const fu=$("#fup");if(fu)fu.onchange=upload;
   if(enter)document.querySelectorAll("#view .hero,#view .st,#view .card,#view .row,#view .pc,#view form,#view .pt,#view .cal").forEach((el,i)=>el.style.animation=`up .55s ${Math.min(i,14)*45}ms cubic-bezier(.2,.8,.2,1) both`);
+  hydrate();
 }
 
 document.addEventListener("click",e=>{
@@ -248,7 +276,7 @@ document.addEventListener("click",e=>{
   if(b.dataset.tab){tab=b.dataset.tab;openP=null;try{location.hash=tab}catch(x){}scrollTo(0,0);return render(true)}
   const a=b.dataset.a,i=parseFloat(b.dataset.i),k=b.dataset.k;
   if(a==="tg"){const t=S.tasks.find(t=>t.id===i);t.done=!t.done}
-  else if(a==="del"){if(k==="papers"){const pp=S.papers.find(x=>x.id===i);if(pp&&pp.pdf){if(!confirm("Delete this paper and its PDF?"))return;fdel(String(pp.pdf.id));if(pp.pdf.gh)ghDel(ghp(pp.pdf)).catch(()=>{})}}if(k==="folders"&&(S.folders.some(f=>f.parent===i)||S.files.some(f=>f.folder===i)))return alert("Folder is not empty.");if(k==="files"){const f=S.files.find(x=>x.id===i);fdel(String(i));if(f&&f.gh)ghDel(ghp(f)).catch(()=>{})}S[k]=S[k].filter(x=>x.id!==i)}
+  else if(a==="del"){if(k==="papers"||k==="researchers"){const it=S[k].find(x=>x.id===i);if(it){if(it.pdf){if(!confirm("Delete this paper and its PDF?"))return;fdel(String(it.pdf.id));if(it.pdf.gh)ghDel(ghp(it.pdf)).catch(()=>{})}delImg(it)}}if(k==="folders"&&(S.folders.some(f=>f.parent===i)||S.files.some(f=>f.folder===i)))return alert("Folder is not empty.");if(k==="files"){const f=S.files.find(x=>x.id===i);fdel(String(i));if(f&&f.gh)ghDel(ghp(f)).catch(()=>{})}S[k]=S[k].filter(x=>x.id!==i)}
   else if(a==="day"){sel=k}else if(a==="bsub"){bsub=k}
   else if(a==="goto"){sel=k;const d=new Date(k+"T00:00");cm=new Date(d.getFullYear(),d.getMonth(),1);tab="Calendar";try{location.hash=tab}catch(x){}scrollTo(0,0);return render(true)}
   else if(a==="mo"){cm.setMonth(cm.getMonth()+ +k)}
@@ -278,7 +306,7 @@ document.addEventListener("submit",e=>{
 $("#pic").addEventListener("change",e=>{
   const file=e.target.files[0];if(!file)return;
   const K=picK,F=picFor;
-  shrink(file,PIC[K]).then(d=>{const it=S[K].find(p=>p.id===F);if(it){it.img=d;save();render()}}).catch(()=>alert("Could not read that image."));
+  shrink(file,PIC[K]).then(async d=>{const it=S[K].find(p=>p.id===F);if(!it)return;if(K==="projects")it.img=d;else{const r=await putImg(d,K,it.name||it.title);if(!r)return;delImg(it);it.img=r.img;it.imgp=r.imgp}save();render()}).catch(()=>alert("Could not read that image."));
   e.target.value="";
 });
 document.addEventListener("change",e=>{const t=e.target;if(t.type==="file"&&t.dataset.show!==undefined){const sp=t.parentNode.querySelector("span");if(sp)sp.textContent=t.files[0]?t.files[0].name:sp.dataset.d}if(t.dataset&&t.dataset.att&&t.files[0]){const fl=t.files[0];t.value="";attachPdf(parseFloat(t.dataset.att),fl);return}if(t.name==="ad"&&t.form&&t.form.tm){t.form.tm.disabled=t.checked;if(t.checked)t.form.tm.value=""}if(t.name==="nd"&&t.form)t.form.d.disabled=t.checked;if(t.dataset&&t.dataset.a==="mv"&&t.value){const f=S.files.find(x=>x.id===parseFloat(t.dataset.i));if(f){f.folder=t.value==="home"?null:parseFloat(t.value);save();render()}}});
